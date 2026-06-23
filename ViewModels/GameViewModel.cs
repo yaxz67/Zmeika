@@ -4,8 +4,10 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using ReactiveUI;
 using Zmeika.Models;
+using Zmeika.Services;
 
 namespace Zmeika.ViewModels
 {
@@ -13,6 +15,7 @@ namespace Zmeika.ViewModels
     {
         private readonly GameSettings _settings;
         private readonly Random _random = new Random();
+        private readonly RadioService _radioService = new RadioService();
         private IDisposable _gameLoop;
 
         private Snake _snake;
@@ -21,6 +24,8 @@ namespace Zmeika.ViewModels
         private bool _isGameOver;
         private double _hue;
         private string _snakeColor = "#00FF00";
+        private string _weatherInfo = "Загрузка погоды...";
+        private string _radioInfo = "Радио выключено";
         
         private int _canvasWidth = 800;
         private int _canvasHeight = 600;
@@ -86,7 +91,21 @@ namespace Zmeika.ViewModels
             set => this.RaiseAndSetIfChanged(ref _snakeColor, value);
         }
 
+        public string WeatherInfo
+        {
+            get => _weatherInfo;
+            set => this.RaiseAndSetIfChanged(ref _weatherInfo, value);
+        }
+
+        public string RadioInfo
+        {
+            get => _radioInfo;
+            set => this.RaiseAndSetIfChanged(ref _radioInfo, value);
+        }
+
         public ReactiveCommand<Direction, Unit> ChangeDirectionCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> ToggleRadioCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> NextStationCommand { get; private set; }
 
         public GameViewModel(GameSettings settings)
         {
@@ -96,6 +115,29 @@ namespace Zmeika.ViewModels
             {
                 if (_snake != null && !IsOppositeDirection(dir))
                     _snake.CurrentDirection = dir;
+            });
+            
+            ToggleRadioCommand = ReactiveCommand.Create(() =>
+            {
+                if (_radioService.CurrentStation != null)
+                {
+                    _radioService.Stop();
+                    RadioInfo = "Радио выключено";
+                }
+                else
+                {
+                    _radioService.PlayStation(0);
+                    RadioInfo = $"{_radioService.CurrentStation.Emoji} {_radioService.CurrentStation.Name}";
+                }
+            });
+            
+            NextStationCommand = ReactiveCommand.Create(() =>
+            {
+                _radioService.NextStation();
+                if (_radioService.CurrentStation != null)
+                {
+                    RadioInfo = $"{_radioService.CurrentStation.Emoji} {_radioService.CurrentStation.Name}";
+                }
             });
         }
 
@@ -128,6 +170,7 @@ namespace Zmeika.ViewModels
         public void Cleanup()
         {
             _gameLoop?.Dispose();
+            _radioService.Stop();
         }
 
         private void Update()

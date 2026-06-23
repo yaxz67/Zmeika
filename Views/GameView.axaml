@@ -17,17 +17,43 @@
             <Canvas x:Name="GameCanvas"/>
         </Border>
         
-        <Border Background="#CC000000" 
-                CornerRadius="0 0 10 10" 
-                Padding="15,10"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top">
-            <TextBlock Text="{Binding Score, StringFormat='🏆 {0}'}" 
-                       FontSize="28" 
-                       FontWeight="Bold"
-                       Foreground="#00FF00"
-                       HorizontalAlignment="Center"/>
-        </Border>
+        <StackPanel Orientation="Horizontal" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Top"
+                    Margin="0,5,0,0"
+                    Spacing="20">
+            
+            <Border Background="#CC000000" 
+                    CornerRadius="10" 
+                    Padding="10,5">
+                <TextBlock Text="{Binding Score, StringFormat='🏆 {0}'}" 
+                           FontSize="24" 
+                           FontWeight="Bold"
+                           Foreground="#00FF00"/>
+            </Border>
+            
+            <Border Background="#CC000000" 
+                    CornerRadius="10" 
+                    Padding="10,5">
+                <TextBlock Text="{Binding RadioInfo}" 
+                           FontSize="14" 
+                           Foreground="#00BFFF"/>
+            </Border>
+        </StackPanel>
+        
+        <StackPanel HorizontalAlignment="Center" 
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,0,10"
+                    Spacing="5">
+            <Border Background="#CC000000" 
+                    CornerRadius="10" 
+                    Padding="10,5"
+                    HorizontalAlignment="Center">
+                <TextBlock Text="🎮 WASD/Стрелки - управление | M - радио | N - след. станция" 
+                           FontSize="12" 
+                           Foreground="#888888"/>
+            </Border>
+        </StackPanel>
         
         <Border Background="#CC000000" 
                 CornerRadius="10" 
