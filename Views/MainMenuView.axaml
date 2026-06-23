@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Zmeika.Views.MainMenuView">
+    
+    <StackPanel Spacing="20" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center"
+                Width="400">
+        
+        <TextBlock Text="🐍 ЗМЕЙКА БРАТАН 🐍" 
+                   FontSize="32" 
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   Foreground="#00FF00"/>
+        
+        <Border BorderBrush="#333" 
+                BorderThickness="2" 
+                CornerRadius="10" 
+                Padding="20">
+            <StackPanel Spacing="15">
+                
+                <CheckBox Name="TeleportCheckBox"
+                          Content="Телепорт при втыкании в стены" 
+                          IsChecked="True"
+                          Foreground="#00FF00"/>
+                
+                <CheckBox Name="RgbCheckBox"
+                          Content="RGB змейка" 
+                          IsChecked="False"
+                          Foreground="#FF00FF"/>
+                
+                <Button Content="▶ ИГРАТЬ" 
+                        Click="StartGame_Click"
+                        Background="#00AA00"
+                        Foreground="White"
+                        FontSize="20"
+                        FontWeight="Bold"
+                        Height="50"
+                        CornerRadius="5"/>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

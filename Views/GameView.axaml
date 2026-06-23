@@ -1,0 +1,63 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Zmeika.ViewModels"
+             x:Class="Zmeika.Views.GameView"
+             x:DataType="vm:GameViewModel"
+             KeyDown="OnKeyDown">
+    
+    <Grid Background="#1A1A1A">
+        <StackPanel Spacing="20" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center"
+                    Margin="20">
+            
+            <Border Background="#2A2A2A" 
+                    CornerRadius="10" 
+                    Padding="15"
+                    HorizontalAlignment="Center">
+                <TextBlock Text="{Binding Score, StringFormat='🏆 СЧЁТ: {0}'}" 
+                           FontSize="28" 
+                           FontWeight="Bold"
+                           Foreground="#00FF00"
+                           HorizontalAlignment="Center"/>
+            </Border>
+            
+            <Border Background="#111" 
+                    Width="{Binding CanvasSize}" 
+                    Height="{Binding CanvasSize}"
+                    BorderBrush="#333"
+                    BorderThickness="2"
+                    CornerRadius="5">
+                <Canvas x:Name="GameCanvas"/>
+            </Border>
+            
+            <Border Background="#2A2A2A" 
+                    CornerRadius="10" 
+                    Padding="15"
+                    IsVisible="{Binding IsGameOver}">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="💀 GAME OVER 💀" 
+                               FontSize="36" 
+                               FontWeight="Bold"
+                               Foreground="#FF4444"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Нажми ESC для выхода в меню" 
+                               FontSize="16" 
+                               Foreground="#888888"
+                               HorizontalAlignment="Center"
+                               Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+            
+            <Border Background="#2A2A2A" 
+                    CornerRadius="10" 
+                    Padding="10"
+                    HorizontalAlignment="Center">
+                <TextBlock Text="🎮 WASD / Стрелки - управление" 
+                           FontSize="14" 
+                           Foreground="#888888"
+                           HorizontalAlignment="Center"/>
+            </Border>
+        </StackPanel>
+    </Grid>
+</UserControl>
