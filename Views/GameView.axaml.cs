@@ -25,38 +25,33 @@ namespace Zmeika.Views
             this.AttachedToVisualTree += (s, e) => 
             {
                 Focus();
-                var window = VisualRoot as Window;
-                if (window != null)
-                {
-                    window.KeyDown += OnWindowKeyDown;
-                }
-            };
-            
-            this.DetachedFromVisualTree += (s, e) =>
-            {
-                var window = VisualRoot as Window;
-                if (window != null)
-                {
-                    window.KeyDown -= OnWindowKeyDown;
-                }
             };
         }
 
-        private void OnWindowKeyDown(object sender, KeyEventArgs e)
+        // Управление змейкой
+        private void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Escape)
+            var vm = DataContext as GameViewModel;
+            if (vm == null || vm.IsGameOver) return;
+
+            switch (e.Key)
             {
-                _viewModel?.Cleanup();
-                
-                var window = sender as Window;
-                if (window != null)
-                {
-                    window.KeyDown -= OnWindowKeyDown;
-                    
-                    var menuView = new MainMenuView();
-                    window.Content = menuView;
-                }
-                e.Handled = true;
+                case Key.W or Key.Up:
+                    vm.ChangeDirectionCommand.Execute(Direction.Up).Subscribe(_ => { });
+                    e.Handled = true;
+                    break;
+                case Key.S or Key.Down:
+                    vm.ChangeDirectionCommand.Execute(Direction.Down).Subscribe(_ => { });
+                    e.Handled = true;
+                    break;
+                case Key.A or Key.Left:
+                    vm.ChangeDirectionCommand.Execute(Direction.Left).Subscribe(_ => { });
+                    e.Handled = true;
+                    break;
+                case Key.D or Key.Right:
+                    vm.ChangeDirectionCommand.Execute(Direction.Right).Subscribe(_ => { });
+                    e.Handled = true;
+                    break;
             }
         }
 
@@ -151,29 +146,6 @@ namespace Zmeika.Views
             Canvas.SetLeft(foodRect, _viewModel.Food.X * cellSize + 1);
             Canvas.SetTop(foodRect, _viewModel.Food.Y * cellSize + 1);
             GameCanvas.Children.Add(foodRect);
-        }
-
-        private void OnKeyDown(object sender, KeyEventArgs e)
-        {
-            var vm = DataContext as GameViewModel;
-            if (vm == null) return;
-
-            switch (e.Key)
-            {
-                case Key.W or Key.Up:
-                    vm.ChangeDirectionCommand.Execute(Direction.Up).Subscribe(_ => { });
-                    break;
-                case Key.S or Key.Down:
-                    vm.ChangeDirectionCommand.Execute(Direction.Down).Subscribe(_ => { });
-                    break;
-                case Key.A or Key.Left:
-                    vm.ChangeDirectionCommand.Execute(Direction.Left).Subscribe(_ => { });
-                    break;
-                case Key.D or Key.Right:
-                    vm.ChangeDirectionCommand.Execute(Direction.Right).Subscribe(_ => { });
-                    break;
-            }
-            e.Handled = true;
         }
     }
 }

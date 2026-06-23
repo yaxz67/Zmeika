@@ -3,5 +3,6 @@
         x:Class="Zmeika.Views.MainWindow"
         Title="🐍 Змейка Братан"
         WindowState="Maximized"
-        Background="#0A0A0A">
+        Background="#0A0A0A"
+        KeyDown="OnWindowKeyDown">
 </Window>

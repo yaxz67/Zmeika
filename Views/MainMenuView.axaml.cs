@@ -20,13 +20,12 @@ namespace Zmeika.Views
             this.AttachedToVisualTree += (s, e) =>
             {
                 Focus();
+                PlayButton.Focus();
             };
         }
 
         private void StartGame_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("КНОПКА НАЖАТА БРАТАН!");
-            
             var settings = new GameSettings
             {
                 EnableTeleport = TeleportCheckBox.IsChecked ?? true,
@@ -52,7 +51,6 @@ namespace Zmeika.Views
                 mainWindow.Content = gameView;
                 gameView.Focus();
             }
-
         }
     }
 }

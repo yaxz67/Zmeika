@@ -3,10 +3,10 @@
              xmlns:vm="clr-namespace:Zmeika.ViewModels"
              x:Class="Zmeika.Views.GameView"
              x:DataType="vm:GameViewModel"
-             KeyDown="OnKeyDown">
+             KeyDown="OnKeyDown"
+             Focusable="True">
     
     <Grid Background="#0A0A0A">
-        <!-- Игровое поле на весь экран -->
         <Border Background="#111" 
                 Width="{Binding CanvasWidth}" 
                 Height="{Binding CanvasHeight}"
@@ -17,7 +17,6 @@
             <Canvas x:Name="GameCanvas"/>
         </Border>
         
-        <!-- Счет сверху -->
         <Border Background="#CC000000" 
                 CornerRadius="0 0 10 10" 
                 Padding="15,10"
@@ -30,7 +29,6 @@
                        HorizontalAlignment="Center"/>
         </Border>
         
-        <!-- Game Over по центру -->
         <Border Background="#CC000000" 
                 CornerRadius="10" 
                 Padding="30"
