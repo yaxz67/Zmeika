@@ -28,7 +28,6 @@ namespace Zmeika.Views
             };
         }
 
-        // Управление змейкой
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
             var vm = DataContext as GameViewModel;
@@ -36,6 +35,25 @@ namespace Zmeika.Views
 
             switch (e.Key)
             {
+                case Key.OemPlus or Key.Add:
+                    e.Handled = true;
+                    break;
+                case Key.OemMinus or Key.Subtract:
+                    e.Handled = true;
+                    break;
+                case Key.B:
+                    if (vm.PreviousStationCommand != null)
+                        vm.PreviousStationCommand.Execute().Subscribe(_ => { });
+                    e.Handled = true;
+                    break;
+                case Key.M:
+                    vm.ToggleRadioCommand.Execute().Subscribe(_ => { });
+                    e.Handled = true;
+                    break;
+                case Key.N:
+                    vm.NextStationCommand.Execute().Subscribe(_ => { });
+                    e.Handled = true;
+                    break;
                 case Key.W or Key.Up:
                     vm.ChangeDirectionCommand.Execute(Direction.Up).Subscribe(_ => { });
                     e.Handled = true;
