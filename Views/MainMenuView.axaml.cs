@@ -17,6 +17,15 @@ namespace Zmeika.Views
             
             PlayButton.Click += StartGame_Click;
             
+            // Обновляем лейбл при изменении слайдера
+            RgbSpeedSlider.PropertyChanged += (s, e) =>
+            {
+                if (e.Property.Name == "Value")
+                {
+                    RgbSpeedLabel.Text = $"{RgbSpeedSlider.Value:F1}x";
+                }
+            };
+            
             this.AttachedToVisualTree += (s, e) =>
             {
                 Focus();
@@ -30,7 +39,8 @@ namespace Zmeika.Views
             {
                 EnableTeleport = TeleportCheckBox.IsChecked ?? true,
                 RgbSnake = RgbCheckBox.IsChecked ?? false,
-                GameSpeed = 150
+                GameSpeed = 150,
+                RgbSpeed = RgbSpeedSlider.Value // Передаём скорость RGB
             };
 
             var gameVm = new GameViewModel(settings);
@@ -50,6 +60,7 @@ namespace Zmeika.Views
                 
                 mainWindow.Content = gameView;
                 gameView.Focus();
+                Debug.WriteLine($"Змейка запущена с RGB скоростью: {settings.RgbSpeed}x");
             }
         }
     }

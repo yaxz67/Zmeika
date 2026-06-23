@@ -182,7 +182,7 @@ namespace Zmeika.ViewModels
 
             if (_settings.RgbSnake)
             {
-                _hue = (_hue + 0.02) % 1.0;
+                _hue = (_hue + 0.02 * _settings.RgbSpeed) % 1.0;
                 SnakeColor = HsvToRgb(_hue, 1, 1);
             }
 
