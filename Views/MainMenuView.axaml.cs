@@ -1,23 +1,32 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using Zmeika.Models;
 using Zmeika.ViewModels;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Zmeika.Views
 {
     public partial class MainMenuView : UserControl
     {
-        public event EventHandler<GameSettings> StartGameRequested;
-
         public MainMenuView()
         {
             InitializeComponent();
+            
+            PlayButton.Click += StartGame_Click;
+            
+            this.AttachedToVisualTree += (s, e) =>
+            {
+                Focus();
+            };
         }
 
         private void StartGame_Click(object sender, RoutedEventArgs e)
         {
+            Debug.WriteLine("КНОПКА НАЖАТА БРАТАН!");
+            
             var settings = new GameSettings
             {
                 EnableTeleport = TeleportCheckBox.IsChecked ?? true,
@@ -25,34 +34,25 @@ namespace Zmeika.Views
                 GameSpeed = 150
             };
 
-            StartGameRequested?.Invoke(this, settings);
+            var gameVm = new GameViewModel(settings);
             
-            if (StartGameRequested == null || !StartGameRequested.GetInvocationList().Any())
-            {
-                var parent = this.Parent;
-                while (parent != null && !(parent is MainWindow))
-                {
-                    parent = parent.Parent;
-                }
+            var mainWindow = this.GetVisualAncestors()
+                .OfType<MainWindow>()
+                .FirstOrDefault();
                 
-                if (parent is MainWindow mainWindow)
-                {
-                    var gameVm = new GameViewModel(settings);
-                    var gameView = new GameView { DataContext = gameVm };
-                    
-                    var contentControl = mainWindow.FindControl<ContentControl>("MainContent");
-                    if (contentControl != null)
-                    {
-                        contentControl.Content = gameView;
-                        gameView.Focus();
-                    }
-                    else
-                    {
-                        mainWindow.Content = gameView;
-                        gameView.Focus();
-                    }
-                }
+            if (mainWindow != null)
+            {
+                var windowWidth = mainWindow.ClientSize.Width;
+                var windowHeight = mainWindow.ClientSize.Height;
+                
+                gameVm.Initialize((int)windowWidth - 4, (int)windowHeight - 4);
+                
+                var gameView = new GameView { DataContext = gameVm };
+                
+                mainWindow.Content = gameView;
+                gameView.Focus();
             }
+
         }
     }
 }

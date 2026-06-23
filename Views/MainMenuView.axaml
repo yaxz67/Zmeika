@@ -29,8 +29,8 @@
                           IsChecked="False"
                           Foreground="#FF00FF"/>
                 
-                <Button Content="▶ ИГРАТЬ" 
-                        Click="StartGame_Click"
+                <Button x:Name="PlayButton"
+                        Content="▶ ИГРАТЬ" 
                         Background="#00AA00"
                         Foreground="White"
                         FontSize="20"

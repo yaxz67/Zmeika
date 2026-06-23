@@ -19,10 +19,45 @@ namespace Zmeika.Views
         {
             InitializeComponent();
             Focusable = true;
-            this.AttachedToVisualTree += (s, e) => Focus();
             
             DataContextChanged += OnDataContextChanged;
-            KeyDown += OnKeyDownGlobal;
+            
+            this.AttachedToVisualTree += (s, e) => 
+            {
+                Focus();
+                var window = VisualRoot as Window;
+                if (window != null)
+                {
+                    window.KeyDown += OnWindowKeyDown;
+                }
+            };
+            
+            this.DetachedFromVisualTree += (s, e) =>
+            {
+                var window = VisualRoot as Window;
+                if (window != null)
+                {
+                    window.KeyDown -= OnWindowKeyDown;
+                }
+            };
+        }
+
+        private void OnWindowKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                _viewModel?.Cleanup();
+                
+                var window = sender as Window;
+                if (window != null)
+                {
+                    window.KeyDown -= OnWindowKeyDown;
+                    
+                    var menuView = new MainMenuView();
+                    window.Content = menuView;
+                }
+                e.Handled = true;
+            }
         }
 
         private void OnDataContextChanged(object sender, EventArgs e)
@@ -43,25 +78,10 @@ namespace Zmeika.Views
                         DrawSnake();
                     if (args.PropertyName == nameof(GameViewModel.Food))
                         DrawFood();
-                    if (args.PropertyName == nameof(GameViewModel.Score))
-                        UpdateScore();
                 };
                 
                 DrawFood();
                 DrawSnake();
-            }
-        }
-
-        private void OnKeyDownGlobal(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape)
-            {
-                var mainWindow = VisualRoot as MainWindow;
-                if (mainWindow != null)
-                {
-                    var menuView = new MainMenuView();
-                    mainWindow.FindControl<ContentControl>("MainContent").Content = menuView;
-                }
             }
         }
 
@@ -131,10 +151,6 @@ namespace Zmeika.Views
             Canvas.SetLeft(foodRect, _viewModel.Food.X * cellSize + 1);
             Canvas.SetTop(foodRect, _viewModel.Food.Y * cellSize + 1);
             GameCanvas.Children.Add(foodRect);
-        }
-
-        private void UpdateScore()
-        {
         }
 
         private void OnKeyDown(object sender, KeyEventArgs e)

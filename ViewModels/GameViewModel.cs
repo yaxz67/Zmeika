@@ -11,7 +11,6 @@ namespace Zmeika.ViewModels
 {
     public class GameViewModel : ViewModelBase
     {
-        private const int GridSize = 20;
         private readonly GameSettings _settings;
         private readonly Random _random = new Random();
         private IDisposable _gameLoop;
@@ -22,11 +21,43 @@ namespace Zmeika.ViewModels
         private bool _isGameOver;
         private double _hue;
         private string _snakeColor = "#00FF00";
+        
+        private int _canvasWidth = 800;
+        private int _canvasHeight = 600;
+        private int _gridWidth = 30;
+        private int _gridHeight = 20;
+        private int _cellSize = 20;
 
-        public int CellSize => 30;
-        
-        public int CanvasSize => GridSize * CellSize;
-        
+        public int CanvasWidth
+        {
+            get => _canvasWidth;
+            set => this.RaiseAndSetIfChanged(ref _canvasWidth, value);
+        }
+
+        public int CanvasHeight
+        {
+            get => _canvasHeight;
+            set => this.RaiseAndSetIfChanged(ref _canvasHeight, value);
+        }
+
+        public int GridWidth
+        {
+            get => _gridWidth;
+            set => this.RaiseAndSetIfChanged(ref _gridWidth, value);
+        }
+
+        public int GridHeight
+        {
+            get => _gridHeight;
+            set => this.RaiseAndSetIfChanged(ref _gridHeight, value);
+        }
+
+        public int CellSize
+        {
+            get => _cellSize;
+            set => this.RaiseAndSetIfChanged(ref _cellSize, value);
+        }
+
         public int ElementSize => CellSize - 2;
 
         public ObservableCollection<Position> SnakeBody => _snake?.Body;
@@ -55,28 +86,48 @@ namespace Zmeika.ViewModels
             set => this.RaiseAndSetIfChanged(ref _snakeColor, value);
         }
 
-        public ReactiveCommand<Direction, Unit> ChangeDirectionCommand { get; }
+        public ReactiveCommand<Direction, Unit> ChangeDirectionCommand { get; private set; }
 
         public GameViewModel(GameSettings settings)
         {
             _settings = settings;
-            _snake = new Snake(GridSize / 2, GridSize / 2);
             
             ChangeDirectionCommand = ReactiveCommand.Create<Direction>(dir =>
             {
-                if (!IsOppositeDirection(dir))
+                if (_snake != null && !IsOppositeDirection(dir))
                     _snake.CurrentDirection = dir;
             });
+        }
 
+        public void Initialize(int canvasWidth, int canvasHeight)
+        {
+            CanvasWidth = canvasWidth;
+            CanvasHeight = canvasHeight;
+            
+            CellSize = Math.Max(20, Math.Min(canvasWidth / 30, canvasHeight / 20));
+            GridWidth = canvasWidth / CellSize;
+            GridHeight = canvasHeight / CellSize;
+            
+            CanvasWidth = GridWidth * CellSize;
+            CanvasHeight = GridHeight * CellSize;
+            
+            _snake = new Snake(GridWidth / 2, GridHeight / 2);
+            
             SpawnFood();
             StartGameLoop();
         }
 
         private void StartGameLoop()
         {
+            _gameLoop?.Dispose();
             _gameLoop = Observable.Interval(TimeSpan.FromMilliseconds(_settings.GameSpeed))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => Update());
+        }
+
+        public void Cleanup()
+        {
+            _gameLoop?.Dispose();
         }
 
         private void Update()
@@ -96,15 +147,15 @@ namespace Zmeika.ViewModels
 
             if (_settings.EnableTeleport)
             {
-                if (newHead.X < 0) newHead.X = GridSize - 1;
-                if (newHead.X >= GridSize) newHead.X = 0;
-                if (newHead.Y < 0) newHead.Y = GridSize - 1;
-                if (newHead.Y >= GridSize) newHead.Y = 0;
+                if (newHead.X < 0) newHead.X = GridWidth - 1;
+                if (newHead.X >= GridWidth) newHead.X = 0;
+                if (newHead.Y < 0) newHead.Y = GridHeight - 1;
+                if (newHead.Y >= GridHeight) newHead.Y = 0;
             }
             else
             {
-                if (newHead.X < 0 || newHead.X >= GridSize || 
-                    newHead.Y < 0 || newHead.Y >= GridSize)
+                if (newHead.X < 0 || newHead.X >= GridWidth || 
+                    newHead.Y < 0 || newHead.Y >= GridHeight)
                 {
                     GameOver();
                     return;
@@ -145,8 +196,8 @@ namespace Zmeika.ViewModels
             {
                 newFood = new Position
                 {
-                    X = _random.Next(0, GridSize),
-                    Y = _random.Next(0, GridSize)
+                    X = _random.Next(0, GridWidth),
+                    Y = _random.Next(0, GridHeight)
                 };
             } while (_snake.Body.Any(p => p.X == newFood.X && p.Y == newFood.Y));
 

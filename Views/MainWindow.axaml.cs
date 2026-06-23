@@ -1,6 +1,4 @@
 using Avalonia.Controls;
-using Zmeika.Models;
-using Zmeika.ViewModels;
 
 namespace Zmeika.Views
 {
@@ -10,19 +8,7 @@ namespace Zmeika.Views
         {
             InitializeComponent();
             
-            var menuView = new MainMenuView();
-            menuView.StartGameRequested += OnStartGameRequested;
-            
-            MainContent.Content = menuView;
-        }
-
-        private void OnStartGameRequested(object sender, GameSettings settings)
-        {
-            var gameVm = new GameViewModel(settings);
-            var gameView = new GameView { DataContext = gameVm };
-            
-            MainContent.Content = gameView;
-            gameView.Focus();
+            Content = new MainMenuView();
         }
     }
 }
