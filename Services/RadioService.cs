@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using LibVLCSharp.Shared;
 
 namespace Zmeika.Services
 {
@@ -12,7 +13,7 @@ namespace Zmeika.Services
         public string Emoji { get; set; }
     }
     
-    public class RadioService
+    public class RadioService : IDisposable
     {
         private readonly List<RadioStation> _stations = new List<RadioStation>
         {
@@ -20,50 +21,55 @@ namespace Zmeika.Services
             new RadioStation { Name = "Европа Плюс", Url = "https://ep256.hostingradio.ru:8052/europaplus256.mp3", Emoji = "🎧" },
             new RadioStation { Name = "Русское Радио", Url = "https://rusradio.hostingradio.ru/rusradio96.aacp", Emoji = "🎸" },
             new RadioStation { Name = "DFM", Url = "https://dfm.hostingradio.ru/dfm96.aacp", Emoji = "🎹" },
-            new RadioStation { Name = "Шансон", Url = "https://chanson.hostingradio.ru:8041/chanson256.mp3", Emoji = "🎤" }
+            new RadioStation { Name = "Шансон", Url = "https://chanson.hostingradio.ru:8041/chanson256.mp3", Emoji = "🎤" },
         };
         
+        private LibVLC _libVlc;
+        private MediaPlayer _mediaPlayer;
         private int _currentStationIndex = -1;
-        private Process _vlcProcess;
         
         public List<RadioStation> Stations => _stations;
         public RadioStation CurrentStation => _currentStationIndex >= 0 ? _stations[_currentStationIndex] : null;
+        public bool IsPlaying => _mediaPlayer?.IsPlaying ?? false;
+        
+        // Событие для обновления UI
+        public event Action<string> StatusChanged;
+        
+        public RadioService()
+        {
+            Core.Initialize();
+            _libVlc = new LibVLC();
+            _mediaPlayer = new MediaPlayer(_libVlc);
+            
+            _mediaPlayer.EndReached += (s, e) =>
+            {
+                // Автоповтор при обрыве
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    Thread.Sleep(2000);
+                    if (_currentStationIndex >= 0)
+                        PlayStation(_currentStationIndex);
+                });
+            };
+        }
         
         public void PlayStation(int index)
         {
-            Stop();
+            if (index < 0 || index >= _stations.Count) return;
             
-            if (index >= 0 && index < _stations.Count)
+            Stop();
+            _currentStationIndex = index;
+            
+            try
             {
-                _currentStationIndex = index;
-                
-                try
-                {
-                    // Пробуем через VLC если установлен
-                    _vlcProcess = Process.Start(new ProcessStartInfo
-                    {
-                        FileName = "vlc",
-                        Arguments = $"--intf dummy --play-and-exit {_stations[index].Url}",
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    });
-                }
-                catch
-                {
-                    // Если VLC нет - открываем в браузере
-                    try
-                    {
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = _stations[index].Url,
-                            UseShellExecute = true
-                        });
-                    }
-                    catch
-                    {
-                        // Ничего не поделать
-                    }
-                }
+                var media = new Media(_libVlc, new Uri(_stations[index].Url));
+                _mediaPlayer.Play(media);
+                StatusChanged?.Invoke($"{_stations[index].Emoji} {_stations[index].Name}");
+            }
+            catch (Exception ex)
+            {
+                StatusChanged?.Invoke($"❌ Ошибка: {ex.Message}");
+                _currentStationIndex = -1;
             }
         }
         
@@ -71,12 +77,26 @@ namespace Zmeika.Services
         {
             try
             {
-                _vlcProcess?.Kill();
-                _vlcProcess?.Dispose();
-                _vlcProcess = null;
+                _mediaPlayer?.Stop();
             }
             catch { }
             _currentStationIndex = -1;
+        }
+        
+        public void TogglePlay()
+        {
+            if (IsPlaying)
+            {
+                Stop();
+                StatusChanged?.Invoke("Радио выключено");
+            }
+            else
+            {
+                if (_currentStationIndex >= 0)
+                    PlayStation(_currentStationIndex);
+                else
+                    PlayStation(0);
+            }
         }
         
         public void NextStation()
@@ -89,6 +109,19 @@ namespace Zmeika.Services
         {
             var prevIndex = (_currentStationIndex - 1 + _stations.Count) % _stations.Count;
             PlayStation(prevIndex);
+        }
+        
+        public void SetVolume(int volume)
+        {
+            if (_mediaPlayer != null)
+                _mediaPlayer.Volume = Math.Clamp(volume, 0, 100);
+        }
+        
+        public void Dispose()
+        {
+            Stop();
+            _mediaPlayer?.Dispose();
+            _libVlc?.Dispose();
         }
     }
 }

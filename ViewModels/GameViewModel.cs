@@ -17,6 +17,8 @@ namespace Zmeika.ViewModels
         private readonly Random _random = new Random();
         private readonly RadioService _radioService = new RadioService();
         private IDisposable _gameLoop;
+        public ReactiveCommand<Unit, Unit> PreviousStationCommand { get; private set; }
+
 
         private Snake _snake;
         private Position _food;
@@ -110,34 +112,32 @@ namespace Zmeika.ViewModels
         public GameViewModel(GameSettings settings)
         {
             _settings = settings;
-            
+    
+            // Подписываемся на изменения статуса радио
+            _radioService.StatusChanged += (status) =>
+            {
+                RadioInfo = status;
+            };
+    
             ChangeDirectionCommand = ReactiveCommand.Create<Direction>(dir =>
             {
                 if (_snake != null && !IsOppositeDirection(dir))
                     _snake.CurrentDirection = dir;
             });
-            
+    
             ToggleRadioCommand = ReactiveCommand.Create(() =>
             {
-                if (_radioService.CurrentStation != null)
-                {
-                    _radioService.Stop();
-                    RadioInfo = "Радио выключено";
-                }
-                else
-                {
-                    _radioService.PlayStation(0);
-                    RadioInfo = $"{_radioService.CurrentStation.Emoji} {_radioService.CurrentStation.Name}";
-                }
+                _radioService.TogglePlay();
             });
-            
+    
             NextStationCommand = ReactiveCommand.Create(() =>
             {
                 _radioService.NextStation();
-                if (_radioService.CurrentStation != null)
-                {
-                    RadioInfo = $"{_radioService.CurrentStation.Emoji} {_radioService.CurrentStation.Name}";
-                }
+            });
+    
+            PreviousStationCommand = ReactiveCommand.Create(() =>
+            {
+                _radioService.PreviousStation();
             });
         }
 

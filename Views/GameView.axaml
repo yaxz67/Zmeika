@@ -49,7 +49,7 @@
                     CornerRadius="10" 
                     Padding="10,5"
                     HorizontalAlignment="Center">
-                <TextBlock Text="🎮 WASD/Стрелки - управление | M - радио | N - след. станция" 
+                <TextBlock Text="🎮 WASD/↑←↓→ - змейка | M - радио | N - след. | B - пред. | ESC - меню" 
                            FontSize="12" 
                            Foreground="#888888"/>
             </Border>
